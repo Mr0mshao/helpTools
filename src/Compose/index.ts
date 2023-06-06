@@ -40,24 +40,24 @@
 
 type AsnycCompose<T> = (...args: any[]) => Promise<T>;
 
-// function asyncCompose<T> (...funcs: Array<AsnycCompose<T>>): AsnycCompose<T> {
-//     return async (...args: any[]): Promise<T> => {
-//         try {
-//             let result = args
-//             for (let i = funcs.length - 1; i >= 0; i--) {
-//                 result = [ await funcs[i](...result) ]
-//             }
-//             return result[0]
-//         } catch (error) {
-//             throw new Error(`Error in asyncCompose: ${error.message}`);
-//         }
-//     }
-// }
-
-
-export function asyncCompose<T> (...funcs: Array<AsnycCompose<T>>): AsnycCompose<T> {
-    const start = funcs.pop()
+function asyncCompose<T> (...funcs: Array<AsnycCompose<T>>): AsnycCompose<T> {
     return async (...args: any[]): Promise<T> => {
-        return await funcs.reverse().reduce(async (result: Promise<T>, next: T) => next.call(this, await result), await start.apply(this, args))
+        try {
+            let result = args
+            for (let i = funcs.length - 1; i >= 0; i--) {
+                result = [ await funcs[i](...result) ]
+            }
+            return result[0]
+        } catch (error) {
+            throw new Error(`Error in asyncCompose: ${error.message}`);
+        }
     }
 }
+
+
+// export function asyncCompose<T> (...funcs: Array<AsnycCompose<T>>): AsnycCompose<T> {
+//     const start = funcs.pop()
+//     return async (...args: any[]): Promise<T> => {
+//         return await funcs.reverse().reduce(async (result: Promise<T>, next: T) => next.call(this, await result), await start.apply(this, args))
+//     }
+// }
